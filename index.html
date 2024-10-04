@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartón de Bingo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .carton-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .carton-container img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Ingresa tu correo</h2>
+        <form id="loginForm">
+            <input type="email" id="correo" placeholder="Ingresa tu correo" required>
+            <input type="submit" value="Generar Cartón">
+        </form>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="carton-container" id="cartonContainer" style="display: none;">
+        <h2>Tu Cartón de Bingo</h2>
+        <img id="cartonImage" src="" alt="Cartón de Bingo">
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const correo = document.getElementById('correo').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const cartonContainer = document.getElementById('cartonContainer');
+            const cartonImage = document.getElementById('cartonImage');
+
+            errorMessage.textContent = '';  // Limpiar cualquier mensaje de error previo
+            cartonContainer.style.display = 'none';  // Ocultar el contenedor del cartón por defecto
+
+            try {
+                const response = await fetch('https://bingo-backend-2del.onrender.com', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ correo: correo }),
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const imageUrl = URL.createObjectURL(blob);
+                    cartonImage.src = imageUrl;
+                    cartonContainer.style.display = 'block';  // Mostrar el contenedor del cartón
+                } else {
+                    const errorData = await response.json();
+                    errorMessage.textContent = errorData.error || 'Error al generar el cartón.';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'No se pudo conectar al servidor. Intenta más tarde.';
+            }
+        });
+    </script>
+
+</body>
+</html>
